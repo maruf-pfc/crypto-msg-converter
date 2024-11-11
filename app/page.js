@@ -1,101 +1,374 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { Moon, Sun } from "lucide-react";
+
+export default function CryptoConverter() {
+  const [selectedAlgo, setSelectedAlgo] = useState("caesar");
+  const [plainText, setPlainText] = useState("");
+  const [cipherText, setCipherText] = useState("");
+  const [key, setKey] = useState("");
+  const [decryptKey, setDecryptKey] = useState("");
+  const [theme, setTheme] = useState("light");
+
+  const algorithms = ["caesar", "vigenere", "playfair", "rsa"];
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
+  const encrypt = () => {
+    let result = "";
+    switch (selectedAlgo) {
+      case "caesar":
+        result = caesarCipher(plainText, parseInt(key));
+        break;
+      case "vigenere":
+        result = vigenereCipher(plainText, key);
+        break;
+      case "playfair":
+        result = playfairCipher(plainText, key);
+        break;
+      case "rsa":
+        result = rsaEncrypt(plainText, key);
+        break;
+    }
+    setCipherText(result);
+  };
+
+  const decrypt = () => {
+    let result = "";
+    switch (selectedAlgo) {
+      case "caesar":
+        result = caesarDecipher(cipherText, parseInt(decryptKey));
+        break;
+      case "vigenere":
+        result = vigenereDecipher(cipherText, decryptKey);
+        break;
+      case "playfair":
+        result = playfairDecipher(cipherText, decryptKey);
+        break;
+      case "rsa":
+        result = rsaDecrypt(cipherText, decryptKey);
+        break;
+    }
+    setPlainText(result);
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+      <div className="container mx-auto p-4 max-w-6xl">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+            Crypto Message Converter
+          </h1>
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {theme === "light" ? <Moon size={24} /> : <Sun size={24} />}
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="w-full lg:w-1/2 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
+              Encryption
+            </h2>
+            <div className="mb-4 flex flex-wrap gap-2">
+              {algorithms.map((algo) => (
+                <button
+                  key={algo}
+                  onClick={() => setSelectedAlgo(algo)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+                    selectedAlgo === algo
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white hover:bg-blue-100 dark:hover:bg-blue-900"
+                  }`}
+                >
+                  {algo.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <div className="mb-4">
+              <input
+                type="text"
+                value={plainText}
+                onChange={(e) => setPlainText(e.target.value)}
+                placeholder="Enter plain text"
+                className="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white"
+              />
+            </div>
+            {selectedAlgo !== "rsa" && (
+              <div className="mb-4">
+                <input
+                  type="text"
+                  value={key}
+                  onChange={(e) => setKey(e.target.value)}
+                  placeholder="Enter key"
+                  className="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white"
+                />
+              </div>
+            )}
+            <div className="mb-4 flex gap-2">
+              <button
+                onClick={encrypt}
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200"
+              >
+                Encrypt
+              </button>
+              <button
+                onClick={() => copyToClipboard(cipherText)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200"
+              >
+                Copy Cipher Text
+              </button>
+            </div>
+            <div>
+              <textarea
+                value={cipherText}
+                readOnly
+                className="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white"
+                rows={4}
+              />
+            </div>
+          </div>
+          <div className="w-full lg:w-1/2 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
+              Decryption
+            </h2>
+            <div className="mb-4">
+              <input
+                type="text"
+                value={cipherText}
+                onChange={(e) => setCipherText(e.target.value)}
+                placeholder="Enter cipher text"
+                className="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white"
+              />
+            </div>
+            {selectedAlgo !== "rsa" && (
+              <div className="mb-4">
+                <input
+                  type="text"
+                  value={decryptKey}
+                  onChange={(e) => setDecryptKey(e.target.value)}
+                  placeholder="Enter decryption key"
+                  className="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white"
+                />
+              </div>
+            )}
+            <div className="mb-4">
+              <button
+                onClick={decrypt}
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200"
+              >
+                Decrypt
+              </button>
+            </div>
+            <div>
+              <textarea
+                value={plainText}
+                readOnly
+                className="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white"
+                rows={4}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
+}
+
+// Encryption algorithms (unchanged)
+function caesarCipher(text, shift) {
+  return text
+    .split("")
+    .map((char) => {
+      if (char.match(/[a-z]/i)) {
+        const code = char.charCodeAt(0);
+        const isUpperCase = code >= 65 && code <= 90;
+        const shiftAmount = isUpperCase ? 65 : 97;
+        return String.fromCharCode(
+          ((code - shiftAmount + shift) % 26) + shiftAmount
+        );
+      }
+      return char;
+    })
+    .join("");
+}
+
+function caesarDecipher(text, shift) {
+  return caesarCipher(text, 26 - shift);
+}
+
+function vigenereCipher(text, key) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let result = "";
+  let keyIndex = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i].toUpperCase();
+    if (alphabet.includes(char)) {
+      const textIndex = alphabet.indexOf(char);
+      const keyChar = key[keyIndex % key.length].toUpperCase();
+      const keyCharIndex = alphabet.indexOf(keyChar);
+      const encryptedIndex = (textIndex + keyCharIndex) % 26;
+      result += alphabet[encryptedIndex];
+      keyIndex++;
+    } else {
+      result += char;
+    }
+  }
+
+  return result;
+}
+
+function vigenereDecipher(text, key) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let result = "";
+  let keyIndex = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i].toUpperCase();
+    if (alphabet.includes(char)) {
+      const textIndex = alphabet.indexOf(char);
+      const keyChar = key[keyIndex % key.length].toUpperCase();
+      const keyCharIndex = alphabet.indexOf(keyChar);
+      const decryptedIndex = (textIndex - keyCharIndex + 26) % 26;
+      result += alphabet[decryptedIndex];
+      keyIndex++;
+    } else {
+      result += char;
+    }
+  }
+
+  return result;
+}
+
+function playfairCipher(text, key) {
+  const alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+  const grid = createPlayfairGrid(key);
+  const pairs = preparePairs(text.toUpperCase().replace(/J/g, "I"));
+
+  return pairs
+    .map((pair) => {
+      const [a, b] = pair.split("");
+      const [aRow, aCol] = findPosition(grid, a);
+      const [bRow, bCol] = findPosition(grid, b);
+
+      if (aRow === bRow) {
+        return grid[aRow][(aCol + 1) % 5] + grid[bRow][(bCol + 1) % 5];
+      } else if (aCol === bCol) {
+        return grid[(aRow + 1) % 5][aCol] + grid[(bRow + 1) % 5][bCol];
+      } else {
+        return grid[aRow][bCol] + grid[bRow][aCol];
+      }
+    })
+    .join("");
+}
+
+function playfairDecipher(text, key) {
+  const alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+  const grid = createPlayfairGrid(key);
+  const pairs = text.match(/.{1,2}/g) || [];
+
+  return pairs
+    .map((pair) => {
+      const [a, b] = pair.split("");
+      const [aRow, aCol] = findPosition(grid, a);
+      const [bRow, bCol] = findPosition(grid, b);
+
+      if (aRow === bRow) {
+        return grid[aRow][(aCol - 1 + 5) % 5] + grid[bRow][(bCol - 1 + 5) % 5];
+      } else if (aCol === bCol) {
+        return grid[(aRow - 1 + 5) % 5][aCol] + grid[(bRow - 1 + 5) % 5][bCol];
+      } else {
+        return grid[aRow][bCol] + grid[bRow][aCol];
+      }
+    })
+    .join("");
+}
+
+function createPlayfairGrid(key) {
+  const alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+  const uniqueChars = [
+    ...new Set(key.toUpperCase().replace(/J/g, "I") + alphabet),
+  ];
+  const grid = [];
+  for (let i = 0; i < 5; i++) {
+    grid.push(uniqueChars.slice(i * 5, (i + 1) * 5));
+  }
+  return grid;
+}
+
+function preparePairs(text) {
+  const pairs = [];
+  for (let i = 0; i < text.length; i += 2) {
+    if (i === text.length - 1) {
+      pairs.push(text[i] + "X");
+    } else if (text[i] === text[i + 1]) {
+      pairs.push(text[i] + "X");
+      i--;
+    } else {
+      pairs.push(text[i] + text[i + 1]);
+    }
+  }
+  return pairs;
+}
+
+function findPosition(grid, char) {
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      if (grid[i][j] === char) {
+        return [i, j];
+      }
+    }
+  }
+  return [-1, -1];
+}
+
+function rsaEncrypt(text, key) {
+  const n = 3233;
+  const e = 17;
+  return text
+    .split("")
+    .map((char) => {
+      const m = char.charCodeAt(0);
+      return BigInt(m) ** BigInt(e) % BigInt(n);
+    })
+    .join(" ");
+}
+
+function rsaDecrypt(text, key) {
+  const n = 3233;
+  const d = 2753;
+  return text
+    .split(" ")
+    .map((char) => {
+      const c = BigInt(char);
+      const m = c ** BigInt(d) % BigInt(n);
+      return String.fromCharCode(Number(m));
+    })
+    .join("");
 }
