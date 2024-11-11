@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Crypto Message Converter
+
+Crypto Message Converter is a web application built with Next.js and Tailwind CSS that allows users to encrypt and decrypt messages using various cryptographic algorithms. The application features a responsive design with both light and dark themes.
+
+## Features
+
+- Support for multiple encryption algorithms:
+  - Caesar Cipher
+  - Vigenère Cipher
+  - Playfair Cipher
+  - Simplified RSA (for demonstration purposes only)
+- Real-time encryption and decryption
+- Responsive design for all devices
+- Light and dark theme support with persistent user preference
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js (version 14 or later)
+- pnpm (comes with Node.js)
+
+### Installation
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/maruf-pfc/crypto-msg-converter.git
+   ```
+
+2. Navigate to the project directory:
+   ```
+   cd crypto-msg-converter
+   ```
+
+3. Install the dependencies:
+   ```
+   pnpm install
+   ```
+
+### Running the Application
+
+To run the application in development mode:
+
+```
+pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Building for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To create a production build:
 
-## Learn More
+```
+pnpm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+To start the production server:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+pnpm start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Usage
 
-## Deploy on Vercel
+1. Select an encryption algorithm from the available options.
+2. For encryption:
+   - Enter the plain text in the input field.
+   - If required by the selected algorithm, enter a key.
+   - Click the "Encrypt" button to see the encrypted text.
+3. For decryption:
+   - Enter the cipher text in the input field.
+   - If required by the selected algorithm, enter the key.
+   - Click the "Decrypt" button to see the decrypted text.
+4. Use the theme toggle button in the top-right corner to switch between light and dark themes.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Security Note
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The cryptographic implementations in this project are for educational purposes only and should not be used for securing sensitive information. The RSA implementation, in particular, uses fixed values and is not secure for real-world applications.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License.

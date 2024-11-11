@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
+import { caesarCipher, caesarDecipher } from "./components/CaesarCipher";
+import { vigenereCipher, vigenereDecipher } from "./components/VigenereCipher";
+import { playfairCipher, playfairDecipher } from "./components/PlayfairCipher";
+import { rsaEncrypt, rsaDecrypt } from "./components/RSA";
 
 export default function CryptoConverter() {
   const [selectedAlgo, setSelectedAlgo] = useState("caesar");
@@ -14,6 +18,7 @@ export default function CryptoConverter() {
   const algorithms = ["caesar", "vigenere", "playfair", "rsa"];
 
   useEffect(() => {
+    // Load the saved theme from localStorage
     const savedTheme = localStorage.getItem("theme") || "light";
     setTheme(savedTheme);
     if (savedTheme === "dark") {
@@ -24,6 +29,7 @@ export default function CryptoConverter() {
   }, []);
 
   const toggleTheme = () => {
+    // Toggle the theme and save it to localStorage
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
@@ -35,6 +41,7 @@ export default function CryptoConverter() {
   };
 
   const encrypt = () => {
+    // Encrypt the plain text using the selected algorithm
     let result = "";
     switch (selectedAlgo) {
       case "caesar":
@@ -54,6 +61,7 @@ export default function CryptoConverter() {
   };
 
   const decrypt = () => {
+    // Decrypt the cipher text using the selected algorithm
     let result = "";
     switch (selectedAlgo) {
       case "caesar":
@@ -73,6 +81,7 @@ export default function CryptoConverter() {
   };
 
   const copyToClipboard = (text) => {
+    // Copy the given text to clipboard
     navigator.clipboard.writeText(text);
   };
 
@@ -198,177 +207,4 @@ export default function CryptoConverter() {
       </div>
     </div>
   );
-}
-
-// Encryption algorithms (unchanged)
-function caesarCipher(text, shift) {
-  return text
-    .split("")
-    .map((char) => {
-      if (char.match(/[a-z]/i)) {
-        const code = char.charCodeAt(0);
-        const isUpperCase = code >= 65 && code <= 90;
-        const shiftAmount = isUpperCase ? 65 : 97;
-        return String.fromCharCode(
-          ((code - shiftAmount + shift) % 26) + shiftAmount
-        );
-      }
-      return char;
-    })
-    .join("");
-}
-
-function caesarDecipher(text, shift) {
-  return caesarCipher(text, 26 - shift);
-}
-
-function vigenereCipher(text, key) {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let result = "";
-  let keyIndex = 0;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i].toUpperCase();
-    if (alphabet.includes(char)) {
-      const textIndex = alphabet.indexOf(char);
-      const keyChar = key[keyIndex % key.length].toUpperCase();
-      const keyCharIndex = alphabet.indexOf(keyChar);
-      const encryptedIndex = (textIndex + keyCharIndex) % 26;
-      result += alphabet[encryptedIndex];
-      keyIndex++;
-    } else {
-      result += char;
-    }
-  }
-
-  return result;
-}
-
-function vigenereDecipher(text, key) {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let result = "";
-  let keyIndex = 0;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i].toUpperCase();
-    if (alphabet.includes(char)) {
-      const textIndex = alphabet.indexOf(char);
-      const keyChar = key[keyIndex % key.length].toUpperCase();
-      const keyCharIndex = alphabet.indexOf(keyChar);
-      const decryptedIndex = (textIndex - keyCharIndex + 26) % 26;
-      result += alphabet[decryptedIndex];
-      keyIndex++;
-    } else {
-      result += char;
-    }
-  }
-
-  return result;
-}
-
-function playfairCipher(text, key) {
-  const alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
-  const grid = createPlayfairGrid(key);
-  const pairs = preparePairs(text.toUpperCase().replace(/J/g, "I"));
-
-  return pairs
-    .map((pair) => {
-      const [a, b] = pair.split("");
-      const [aRow, aCol] = findPosition(grid, a);
-      const [bRow, bCol] = findPosition(grid, b);
-
-      if (aRow === bRow) {
-        return grid[aRow][(aCol + 1) % 5] + grid[bRow][(bCol + 1) % 5];
-      } else if (aCol === bCol) {
-        return grid[(aRow + 1) % 5][aCol] + grid[(bRow + 1) % 5][bCol];
-      } else {
-        return grid[aRow][bCol] + grid[bRow][aCol];
-      }
-    })
-    .join("");
-}
-
-function playfairDecipher(text, key) {
-  const alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
-  const grid = createPlayfairGrid(key);
-  const pairs = text.match(/.{1,2}/g) || [];
-
-  return pairs
-    .map((pair) => {
-      const [a, b] = pair.split("");
-      const [aRow, aCol] = findPosition(grid, a);
-      const [bRow, bCol] = findPosition(grid, b);
-
-      if (aRow === bRow) {
-        return grid[aRow][(aCol - 1 + 5) % 5] + grid[bRow][(bCol - 1 + 5) % 5];
-      } else if (aCol === bCol) {
-        return grid[(aRow - 1 + 5) % 5][aCol] + grid[(bRow - 1 + 5) % 5][bCol];
-      } else {
-        return grid[aRow][bCol] + grid[bRow][aCol];
-      }
-    })
-    .join("");
-}
-
-function createPlayfairGrid(key) {
-  const alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
-  const uniqueChars = [
-    ...new Set(key.toUpperCase().replace(/J/g, "I") + alphabet),
-  ];
-  const grid = [];
-  for (let i = 0; i < 5; i++) {
-    grid.push(uniqueChars.slice(i * 5, (i + 1) * 5));
-  }
-  return grid;
-}
-
-function preparePairs(text) {
-  const pairs = [];
-  for (let i = 0; i < text.length; i += 2) {
-    if (i === text.length - 1) {
-      pairs.push(text[i] + "X");
-    } else if (text[i] === text[i + 1]) {
-      pairs.push(text[i] + "X");
-      i--;
-    } else {
-      pairs.push(text[i] + text[i + 1]);
-    }
-  }
-  return pairs;
-}
-
-function findPosition(grid, char) {
-  for (let i = 0; i < 5; i++) {
-    for (let j = 0; j < 5; j++) {
-      if (grid[i][j] === char) {
-        return [i, j];
-      }
-    }
-  }
-  return [-1, -1];
-}
-
-function rsaEncrypt(text, key) {
-  const n = 3233;
-  const e = 17;
-  return text
-    .split("")
-    .map((char) => {
-      const m = char.charCodeAt(0);
-      return BigInt(m) ** BigInt(e) % BigInt(n);
-    })
-    .join(" ");
-}
-
-function rsaDecrypt(text, key) {
-  const n = 3233;
-  const d = 2753;
-  return text
-    .split(" ")
-    .map((char) => {
-      const c = BigInt(char);
-      const m = c ** BigInt(d) % BigInt(n);
-      return String.fromCharCode(Number(m));
-    })
-    .join("");
 }
